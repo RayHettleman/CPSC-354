@@ -1,0 +1,48 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+\title{The MIU System and the Impossibility of MIII}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section*{Goal}
+The goal is to determine whether it is possible to derive \texttt{MIII} starting from \texttt{MI} using the rules of the MIU system.
+
+\section*{Rules}
+\textbf{Rule I:} If you possess a string whose last letter is \texttt{I}, you can add a \texttt{U} at the end.  
+
+\textbf{Rule II:} Suppose you have \texttt{Mx}. Then you may add \texttt{Mxx} to your collection.  
+
+\textbf{Rule III:} If \texttt{III} occurs in one of the strings in your collection, you may make a new string with \texttt{U} in place of \texttt{III}.  
+
+\textbf{Rule IV:} If \texttt{UU} occurs inside one of your strings, you can drop it.  
+
+\section*{Attempts}
+\noindent
+\begin{verbatim}
+                            v—----------------------v
+MI - MIU - MIUIU - MIUUIUU - MII - MIIU - MIIUU - MII *
+                            MIIII - MUI - MUI - MUIIU
+*THOUGHT* If possible, try to get MIII
+\end{verbatim}
+
+For example: starting with one \texttt{I}, Rule II can double it, giving two total \texttt{I}'s with a \texttt{U} in between. Because the only way for the number of \texttt{I}'s to grow is doubling, every time Rule III might apply, there will always be one leftover. This means it is never possible to reach exactly three \texttt{I}'s.
+
+\section*{Conclusion}
+None of the rules leads to the number of \texttt{I}'s being three.  
+
+\begin{itemize}
+    \item Rule I has no effect on the number of \texttt{I}'s.  
+    \item Rule II can only double the \texttt{I}'s, which means they are always even after the first step. Getting exactly three \texttt{I}'s is therefore impossible.  
+    \item Rule III is the important rule, because if we could get three \texttt{I}'s, this is how we would turn it into \texttt{MU}. But since we can’t reach three \texttt{I}'s, the rule never helps.  
+    \item Rule IV has no effect on the number of \texttt{I}'s.  
+\end{itemize}
+
+Therefore, it is impossible to derive \texttt{MIII} from \texttt{MI}.
+
+\end{document}
