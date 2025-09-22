@@ -178,4 +178,47 @@ Exercise 5 shows a non-terminating but confluent system (everything has the uniq
 Exercise 5b shows that adding another looping branch breaks confluence, since from $a$
 different outcomes are possible.
 
+% =========================================================
+\section{Assignment 4: Termination}
+
+\subsection{HW 4.1}
+Consider the following algorithm:
+\begin{verbatim}
+while b != 0:
+    temp = b
+    b = a mod b
+    a = temp
+return a
+\end{verbatim}
+
+\paragraph{Conditions.} Termination is guaranteed if $a, b$ are nonnegative integers and $b > 0$ initially.
+
+\paragraph{Measure function.} Define $\varphi(a,b) = b$.  
+At each step $b$ is replaced by $a \bmod b$, which is strictly smaller than $b$ but always nonnegative. Therefore $\varphi$ decreases with every iteration.
+
+\paragraph{Conclusion.} Since $\varphi(a,b)$ is a nonnegative integer that strictly decreases, the loop must terminate. The algorithm is in fact Euclid’s algorithm for $\gcd(a,b)$.
+
+\subsection{HW 4.2}
+Consider the following fragment of an implementation of merge sort:
+\begin{verbatim}
+function merge_sort(arr, left, right):
+    if left >= right:
+        return
+    mid = (left + right) / 2
+    merge_sort(arr, left, mid)
+    merge_sort(arr, mid+1, right)
+    merge(arr, left, mid, right)
+\end{verbatim}
+
+\paragraph{Measure function.} Define $\varphi(left,right) = right - left + 1$, the length of the current subarray.
+
+\paragraph{Proof.} Each recursive call works on a subarray that is strictly smaller than the current one:
+\begin{itemize}
+  \item Initially, $\varphi(left,right) = n$ (array length).
+  \item The recursive calls split the array into halves, so each subproblem has measure about $n/2$, strictly less than $n$.
+  \item The base case $left \geq right$ gives $\varphi(left,right) \leq 1$, so recursion stops.
+\end{itemize}
+
+\paragraph{Conclusion.} Because the measure is a nonnegative integer that strictly decreases with each recursive call, \texttt{merge\_sort} always terminates.
+
 \end{document}
