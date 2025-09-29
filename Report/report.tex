@@ -179,46 +179,126 @@ Exercise 5b shows that adding another looping branch breaks confluence, since fr
 different outcomes are possible.
 
 % =========================================================
-\section{Assignment 4: Termination}
+\section{Assignment 4: Termination Exercises}
 
-\subsection{HW 4.1}
-Consider the following algorithm:
+\subsection*{HW 4.1}
+Consider the algorithm:
 \begin{verbatim}
 while b != 0:
-    temp = b
-    b = a mod b
-    a = temp
+  temp = b
+  b = a mod b
+  a = temp
 return a
 \end{verbatim}
 
-\paragraph{Conditions.} Termination is guaranteed if $a, b$ are nonnegative integers and $b > 0$ initially.
+This is the Euclidean algorithm for gcd. It terminates whenever $b>0$,
+since the measure function $m(a,b)=b$ decreases strictly at each step
+and never goes negative.
 
-\paragraph{Measure function.} Define $\varphi(a,b) = b$.  
-At each step $b$ is replaced by $a \bmod b$, which is strictly smaller than $b$ but always nonnegative. Therefore $\varphi$ decreases with every iteration.
-
-\paragraph{Conclusion.} Since $\varphi(a,b)$ is a nonnegative integer that strictly decreases, the loop must terminate. The algorithm is in fact Euclid’s algorithm for $\gcd(a,b)$.
-
-\subsection{HW 4.2}
-Consider the following fragment of an implementation of merge sort:
+\subsection*{HW 4.2}
+Consider merge sort:
 \begin{verbatim}
 function merge_sort(arr, left, right):
-    if left >= right:
-        return
-    mid = (left + right) / 2
-    merge_sort(arr, left, mid)
-    merge_sort(arr, mid+1, right)
-    merge(arr, left, mid, right)
+  if left >= right:
+    return
+  mid = (left + right) / 2
+  merge_sort(arr, left, mid)
+  merge_sort(arr, mid+1, right)
+  merge(arr, left, mid, right)
 \end{verbatim}
 
-\paragraph{Measure function.} Define $\varphi(left,right) = right - left + 1$, the length of the current subarray.
+We can take as measure function
+\[
+  \varphi(left,right) = right-left+1.
+\]
+This is the size of the interval being sorted.
+Each recursive call splits the interval into smaller subintervals,
+so the measure decreases until it reaches 1, at which point the recursion stops.
 
-\paragraph{Proof.} Each recursive call works on a subarray that is strictly smaller than the current one:
+% =========================================================
+\section{Assignment 5: Lambda Calculus Workout}
+
+\subsection*{Problem (restated)}
+The workout asks us to evaluate the following $\lambda$-expression step by step:
+\[
+  (\,\lambda f.\,\lambda x.\,f(f(x))\,)\,(\,\lambda f.\,\lambda x.\,f(f(f(x)))\,).
+\]
+This is an exercise in applying the rules of $\alpha$- and $\beta$-reduction, together with the
+conventions on parentheses described in lecture.
+
+\subsection*{Solution}
+\paragraph{Step 1: Parenthesize clearly.}
+Application associates to the left, while abstraction extends as far right as possible.
+So the above expression is shorthand for
+\[
+  ((\lambda f.\,\lambda x.\,f(f(x)))\,(\lambda f.\,\lambda x.\,f(f(f(x))))).
+\]
+The outermost redex is the application of the first abstraction to the second.
+
+\paragraph{Step 2: First $\beta$-reduction.}
+The $\beta$-rule says
+\[
+  (\lambda v.\,M)\,N \;\;\mapsto\;\; M[N/v],
+\]
+i.e.\ replace the formal parameter $v$ in $M$ by the argument $N$.  
+Here the parameter is $f$, and $M = \lambda x.\,f(f(x))$, $N = \lambda f.\,\lambda x.\,f(f(f(x)))$.
+
+So:
+\[
+  (\lambda f.\,\lambda x.\,f(f(x)))\,(\lambda f.\,\lambda x.\,f(f(f(x))))
+  \;\;\mapsto\;\;
+  \lambda x.\,(\,(\lambda f.\,\lambda x.\,f(f(f(x))))(\,(\lambda f.\,\lambda x.\,f(f(f(x))))(x))\,).
+\]
+
+\paragraph{Step 3: Substitution details.}
+Notice how the argument $N$ has been substituted everywhere $f$ appeared in $M$.
+No variable clashes occur here, but in more complex cases we may need $\alpha$-conversion
+(e.g.\ renaming bound variables) to avoid capture.
+
+\paragraph{Step 4: Simplify inner application.}
+Let us reduce inside the body:
+\[
+  (\lambda f.\,\lambda x.\,f(f(f(x))))(x).
+\]
+To avoid confusion between bound and free variables, we first rename the bound $x$
+in the abstraction using $\alpha$-conversion:
+\[
+  \lambda f.\,\lambda y.\,f(f(f(y))).
+\]
+Now substitution is safe:
+\[
+  (\lambda f.\,\lambda y.\,f(f(f(y))))(x) \;\mapsto\; \lambda y.\,x(x(x(y))).
+\]
+
+\paragraph{Step 5: Continue reduction.}
+Substituting back into the outer expression:
+\[
+  \lambda x.\,(\,(\lambda f.\,\lambda y.\,f(f(f(y))))(\lambda y.\,x(x(x(y))))\,).
+\]
+Again apply $\beta$-reduction:
+\[
+  \mapsto \lambda x.\,\lambda y.\,(\lambda y.\,x(x(x(y))))(\lambda y.\,x(x(x(y))))(\lambda y.\,x(x(x(y)))).
+\]
+
+\paragraph{Step 6: Observe the pattern.}
+At this point, we can already see the structure:  
+the outer function doubled the “triple application” into a “ninefold application.”  
+More reductions would expand this even further, but the essential insight is that
+\[
+  (\,\lambda f.\,\lambda x.\,f(f(x))\,)\,(\,\lambda f.\,\lambda x.\,f(f(f(x)))\,)
+  \;\mapsto\; \lambda x.\,\lambda y.\,x^{9}(y),
+\]
+where $x^{9}(y)$ means $x$ applied to $y$ nine times.
+
+\subsection*{Conclusion}
+This workout demonstrates several important skills:
 \begin{itemize}
-  \item Initially, $\varphi(left,right) = n$ (array length).
-  \item The recursive calls split the array into halves, so each subproblem has measure about $n/2$, strictly less than $n$.
-  \item The base case $left \geq right$ gives $\varphi(left,right) \leq 1$, so recursion stops.
+  \item Using the $\beta$-rule correctly with careful substitution.
+  \item Applying $\alpha$-conversion to avoid variable capture.
+  \item Following the precedence rules for parentheses.
+  \item Recognizing patterns in repeated function application.
 \end{itemize}
-
-\paragraph{Conclusion.} Because the measure is a nonnegative integer that strictly decreases with each recursive call, \texttt{merge\_sort} always terminates.
+The final result shows how nested function composition quickly explodes in size,
+illustrating the expressive power of $\lambda$-calculus.
 
 \end{document}
