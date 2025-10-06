@@ -218,87 +218,172 @@ so the measure decreases until it reaches 1, at which point the recursion stops.
 % =========================================================
 \section{Assignment 5: Lambda Calculus Workout}
 
+\subsection*{Note}
+As suggested, I also checked the step sequence in VS Code with Haskell
+syntax highlighting (file saved with \texttt{.hs}), which helps match parentheses.
+
 \subsection*{Problem (restated)}
-The workout asks us to evaluate the following $\lambda$-expression step by step:
+Evaluate
 \[
   (\,\lambda f.\,\lambda x.\,f(f(x))\,)\,(\,\lambda f.\,\lambda x.\,f(f(f(x)))\,).
 \]
-This is an exercise in applying the rules of $\alpha$- and $\beta$-reduction, together with the
-conventions on parentheses described in lecture.
 
 \subsection*{Solution}
-\paragraph{Step 1: Parenthesize clearly.}
-Application associates to the left, while abstraction extends as far right as possible.
-So the above expression is shorthand for
+\paragraph{Step 1 (parentheses).}
+Application associates left; abstractions extend right:
 \[
-  ((\lambda f.\,\lambda x.\,f(f(x)))\,(\lambda f.\,\lambda x.\,f(f(f(x))))).
-\]
-The outermost redex is the application of the first abstraction to the second.
-
-\paragraph{Step 2: First $\beta$-reduction.}
-The $\beta$-rule says
-\[
-  (\lambda v.\,M)\,N \;\;\mapsto\;\; M[N/v],
-\]
-i.e.\ replace the formal parameter $v$ in $M$ by the argument $N$.  
-Here the parameter is $f$, and $M = \lambda x.\,f(f(x))$, $N = \lambda f.\,\lambda x.\,f(f(f(x)))$.
-
-So:
-\[
-  (\lambda f.\,\lambda x.\,f(f(x)))\,(\lambda f.\,\lambda x.\,f(f(f(x))))
-  \;\;\mapsto\;\;
-  \lambda x.\,(\,(\lambda f.\,\lambda x.\,f(f(f(x))))(\,(\lambda f.\,\lambda x.\,f(f(f(x))))(x))\,).
+  ((\lambda f.\,\lambda x.\,f(f(x)))\;(\lambda f.\,\lambda x.\,f(f(f(x))))).
 \]
 
-\paragraph{Step 3: Substitution details.}
-Notice how the argument $N$ has been substituted everywhere $f$ appeared in $M$.
-No variable clashes occur here, but in more complex cases we may need $\alpha$-conversion
-(e.g.\ renaming bound variables) to avoid capture.
-
-\paragraph{Step 4: Simplify inner application.}
-Let us reduce inside the body:
+\paragraph{Step 2 ($\beta$).}
+$(\lambda v.M)\,N \mapsto M[N/v]$ with $v=f$:
 \[
-  (\lambda f.\,\lambda x.\,f(f(f(x))))(x).
-\]
-To avoid confusion between bound and free variables, we first rename the bound $x$
-in the abstraction using $\alpha$-conversion:
-\[
-  \lambda f.\,\lambda y.\,f(f(f(y))).
-\]
-Now substitution is safe:
-\[
-  (\lambda f.\,\lambda y.\,f(f(f(y))))(x) \;\mapsto\; \lambda y.\,x(x(x(y))).
+  \mapsto\ \lambda x.\, \big((\lambda f.\,\lambda x.\,f(f(f(x))))\big((\lambda f.\,\lambda x.\,f(f(f(x))))\,x\big)\big).
 \]
 
-\paragraph{Step 5: Continue reduction.}
-Substituting back into the outer expression:
+\paragraph{Step 3 ($\alpha$ then $\beta$ inside).}
+Rename the inner abstraction’s bound $x$ to $y$ to avoid clashes,
+then apply $\beta$:
 \[
-  \lambda x.\,(\,(\lambda f.\,\lambda y.\,f(f(f(y))))(\lambda y.\,x(x(x(y))))\,).
-\]
-Again apply $\beta$-reduction:
-\[
-  \mapsto \lambda x.\,\lambda y.\,(\lambda y.\,x(x(x(y))))(\lambda y.\,x(x(x(y))))(\lambda y.\,x(x(x(y)))).
+ (\lambda f.\,\lambda y.\,f(f(f(y))))\,x \mapsto \lambda y.\,x(x(x(y))).
 \]
 
-\paragraph{Step 6: Observe the pattern.}
-At this point, we can already see the structure:  
-the outer function doubled the “triple application” into a “ninefold application.”  
-More reductions would expand this even further, but the essential insight is that
+\paragraph{Step 4 ($\beta$ again).}
 \[
-  (\,\lambda f.\,\lambda x.\,f(f(x))\,)\,(\,\lambda f.\,\lambda x.\,f(f(f(x)))\,)
-  \;\mapsto\; \lambda x.\,\lambda y.\,x^{9}(y),
+  \lambda x.\,\big((\lambda f.\,\lambda y.\,f(f(f(y))))(\lambda y.\,x(x(x(y))))\big)
+  \mapsto \lambda x.\,\lambda y.\,(\lambda y.\,x(x(x(y))))\,(\lambda y.\,x(x(x(y))))\,(\lambda y.\,x(x(x(y)))).
 \]
-where $x^{9}(y)$ means $x$ applied to $y$ nine times.
+
+\paragraph{Step 5 (pattern).}
+This denotes nine nested applications of $x$:
+\[
+  \mapsto\ \lambda x.\,\lambda y.\,x^9(y).
+\]
 
 \subsection*{Conclusion}
-This workout demonstrates several important skills:
-\begin{itemize}
-  \item Using the $\beta$-rule correctly with careful substitution.
-  \item Applying $\alpha$-conversion to avoid variable capture.
-  \item Following the precedence rules for parentheses.
-  \item Recognizing patterns in repeated function application.
-\end{itemize}
-The final result shows how nested function composition quickly explodes in size,
-illustrating the expressive power of $\lambda$-calculus.
+We practiced $\beta$-reduction, careful substitution, and $\alpha$-conversion;
+the composition doubles the triple into a ninefold application.
+
+% =========================================================
+\section{Assignment 6: Fixed Point Combinator — Computing \texorpdfstring{$\mathsf{fact}\ 3$}{fact 3}}
+
+\subsection*{Problem (restated)}
+Compute the result of
+\[
+\texttt{let rec fact = \textbackslash n. if n=0 then 1 else n * fact (n-1) in\ 3}
+\]
+using only the computation rules provided in class for \texttt{fix}, \texttt{let}, and \texttt{let rec}, together with simple
+rules for booleans, conditionals, and arithmetic (as suggested on the sheet).
+
+\subsection*{Rules we use (from lecture)}
+\begin{align*}
+\texttt{fix F} &\;\;\mapsto\;\; \texttt{(F (fix F))} \qquad &\langle\text{rule for \texttt{fix}}\rangle\\
+\texttt{let x = e1 in e2} &\;\;\mapsto\;\; \texttt{((\textbackslash x.\ e2)\ e1)} \qquad &\langle\text{def of \texttt{let}}\rangle\\
+\texttt{let rec f = e1 in e2} &\;\;\mapsto\;\; \texttt{let f = (fix (\textbackslash f.\ e1)) in e2} \qquad &\langle\text{def of \texttt{let rec}}\rangle
+\end{align*}
+For the arithmetic/boolean side (as recommended):\\
+\texttt{0=0 $\mapsto$ True}, \quad \texttt{1=0 $\mapsto$ False}, \quad
+\texttt{if True then A else B $\mapsto$ A}, \quad
+\texttt{if False then A else B $\mapsto$ B}, \\
+\texttt{2*1 $\mapsto$ 2}, \quad \texttt{3*2 $\mapsto$ 6}, \quad \texttt{3-1 $\mapsto$ 2}, \quad \texttt{2-1 $\mapsto$ 1}, etc.
+
+\subsection*{Abbreviation}
+For readability let
+\[
+\texttt{F} \;\; \equiv \;\; \texttt{\textbackslash fact.\ \textbackslash n.\ if n=0 then 1 else n * fact (n-1)}.
+\]
+
+\subsection*{Computation}
+We now reduce, labeling every step with the rule name (matching the sheet).
+
+\medskip
+\noindent
+\texttt{let rec fact = \textbackslash n. if n=0 then 1 else n * fact (n-1) in 3}\\
+\(\to\) \texttt{let fact = (fix (\textbackslash fact.\ \textbackslash n.\ if n=0 then 1 else n * fact (n-1))) in 3}
+\hfill \(\langle\)def of \texttt{let rec}\(\rangle\)
+
+\medskip
+\noindent
+\(\to\) \texttt{((\textbackslash fact.\ 3)\ (fix (\textbackslash fact.\ \textbackslash n.\ if n=0 then 1 else n * fact (n-1))))}
+\hfill \(\langle\)def of \texttt{let}\(\rangle\)
+
+\medskip
+\noindent
+\(\to\) \texttt{3} \quad with an environment binding
+\texttt{fact := (fix (\textbackslash fact.\ \textbackslash n.\ if n=0 then 1 else n * fact (n-1)))}.
+\hfill \(\langle\beta\rangle\)
+
+\medskip
+
+But to \emph{evaluate} \texttt{fact 3} we unfold \texttt{fix} as needed:
+
+\begin{align*}
+\texttt{fact} &= \texttt{fix (\textbackslash fact.\ \textbackslash n.\ if n=0 then 1 else n * fact (n-1))}\\
+&= \texttt{fix F} \\
+&\mapsto \texttt{(F (fix F))} && \langle\text{rule for \texttt{fix}}\rangle\\
+&= \texttt{(\textbackslash fact.\ \textbackslash n.\ if n=0 then 1 else n * fact (n-1)) (fix F)}\\
+&\mapsto \texttt{\textbackslash n.\ if n=0 then 1 else n * (fix F)\ (n-1)} && \langle\beta\rangle
+\end{align*}
+
+Now apply this to \texttt{3}:
+
+\begin{align*}
+\texttt{fact 3}
+&\mapsto \texttt{if 3=0 then 1 else 3 * (fix F)\ (3-1)} && \langle\beta\rangle\\
+&\mapsto \texttt{if False then 1 else 3 * (fix F)\ 2} && \langle 3=0 \mapsto \text{False}\rangle\\
+&\mapsto \texttt{3 * (fix F)\ 2} && \langle \text{if False}\rangle
+\end{align*}
+
+Unfold \texttt{fix} again to compute \texttt{(fix F)\ 2}:
+
+\begin{align*}
+\texttt{(fix F)}
+&\mapsto \texttt{(F (fix F))} && \langle\text{rule for \texttt{fix}}\rangle\\
+&\mapsto \texttt{\textbackslash n.\ if n=0 then 1 else n * (fix F)\ (n-1)} && \langle\beta\rangle
+\end{align*}
+
+So
+\begin{align*}
+\texttt{(fix F)\ 2}
+&\mapsto \texttt{if 2=0 then 1 else 2 * (fix F)\ (2-1)} && \langle\beta\rangle\\
+&\mapsto \texttt{2 * (fix F)\ 1} && \langle 2=0 \mapsto \text{False},\ \text{if False}\rangle
+\end{align*}
+
+Again unfold for the \texttt{1} case:
+\begin{align*}
+\texttt{(fix F)\ 1}
+&\mapsto \texttt{if 1=0 then 1 else 1 * (fix F)\ (1-1)} && \langle\beta\rangle\\
+&\mapsto \texttt{if False then 1 else 1 * (fix F)\ 0} && \langle 1=0 \mapsto \text{False}\rangle\\
+&\mapsto \texttt{1 * (fix F)\ 0} && \langle \text{if False}\rangle
+\end{align*}
+
+Base case:
+\begin{align*}
+\texttt{(fix F)\ 0}
+&\mapsto \texttt{if 0=0 then 1 else 0 * (fix F)\ (-1)} && \langle\beta\rangle\\
+&\mapsto \texttt{1} && \langle 0=0 \mapsto \text{True},\ \text{if True}\rangle
+\end{align*}
+
+So back-substituting:
+\[
+\texttt{(fix F)\ 1} \mapsto \texttt{1 * 1} \mapsto \texttt{1}.
+\]
+
+Then
+\[
+\texttt{(fix F)\ 2} \mapsto \texttt{2 * 1} \mapsto \texttt{2}.
+\]
+
+Finally
+\[
+\texttt{fact 3} \mapsto \texttt{3 * 2} \mapsto \texttt{6}.
+\]
+
+\subsection*{Conclusion}
+Following only the lecture’s computation rules and the suggested simple arithmetic/boolean reductions, the program
+\[
+\texttt{let rec fact = \textbackslash n. if n=0 then 1 else n * fact (n-1) in 3}
+\]
+reduces to \textbf{\texttt{6}}. The trace shows the pattern of unfolding \texttt{fix} exactly when needed and using \(\beta\)-reductions together with the conditional rules. (I also mirrored the lecture style of naming each rule beside the step, and verified parentheses in VS Code with Haskell highlighting.)
 
 \end{document}
