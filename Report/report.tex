@@ -6,7 +6,7 @@
 \usepackage{booktabs}
 \usepackage{enumitem}
 \usepackage{tikz}
-\usetikzlibrary{arrows.meta,positioning}
+\usetikzlibrary{arrows.meta,positioning,trees}
 \usepackage[hidelinks]{hyperref}
 
 \newcommand{\ARSnode}[1]{%
@@ -15,7 +15,13 @@
 \newcommand{\ARSnodeat}[2]{%
   \node[circle,draw,minimum size=7mm,inner sep=0pt, #2] (#1) {$#1$};%
 }
-\tikzset{>={Stealth[length=3mm]}, every loop/.style={looseness=7}}
+\tikzset{
+  >={Stealth[length=3mm]},
+  every loop/.style={looseness=7},
+  ptree/.style={level distance=10mm, sibling distance=18mm},
+  nt/.style   ={draw, rounded corners, inner sep=1.2pt, font=\footnotesize\ttfamily, fill=gray!10},
+  tm/.style   ={font=\footnotesize\ttfamily}
+}
 
 \title{CPSC-354 Report}
 \author{Ray Hettleman \\ Chapman University \\ \texttt{rhettleman@chapman.edu}}
@@ -26,9 +32,6 @@
 
 \begin{abstract}
 This report collects my weekly notes, homework, and reflections for CPSC-354. 
-Each week builds on the previous one, exploring rewriting systems, abstract reduction systems, 
-termination proofs, lambda calculus, and recursion. All work was typeset in \LaTeX{} 
-and verified using VS Code, TikZ, and Haskell syntax highlighting for structured computation steps.
 \end{abstract}
 
 \tableofcontents
@@ -297,6 +300,166 @@ Following only the allowed computation rules, \texttt{fact 3} reduces to \textbf
 \subsubsection{Questions}
 \emph{Would using $\alpha$-conversion anywhere in the factorial example change the result, or just make it cleaner?}
 
+% ---------- Week 7 ----------
+\subsection{Week 7}
+
+\subsubsection{Notes and Exploration}
+Parsing and context-free grammars. We use the grammar (nonterminals \texttt{Exp}, \texttt{Exp1}, \texttt{Exp2}):
+
+\begin{verbatim}
+Exp  -> Exp '+' Exp1
+Exp1 -> Exp1 '*' Exp2
+Exp2 -> Integer
+Exp2 -> '(' Exp ')'
+Exp  -> Exp1
+Exp1 -> Exp2
+\end{verbatim}
+
+\subsubsection{Homework: Parse Trees}
+Below are derivation trees (concrete syntax trees) for the required expressions. 
+Nonterminals are boxed; terminals are leaves.
+
+\paragraph{(a) \texttt{2+1}}
+\begin{center}
+\begin{tikzpicture}[ptree]
+\node[nt]{Exp}
+  child { node[nt]{Exp}
+    child { node[nt]{Exp1}
+      child { node[nt]{Exp2}
+        child { node[tm]{2} }
+      }
+    }
+  }
+  child { node[tm]{+} }
+  child { node[nt]{Exp1}
+    child { node[nt]{Exp2}
+      child { node[tm]{1} }
+    }
+  };
+\end{tikzpicture}
+\end{center}
+
+\paragraph{(b) \texttt{1+2*3}}
+\begin{center}
+\begin{tikzpicture}[ptree]
+\node[nt]{Exp}
+  child { node[nt]{Exp}
+    child { node[nt]{Exp1}
+      child { node[nt]{Exp2}
+        child { node[tm]{1} }
+      }
+    }
+  }
+  child { node[tm]{+} }
+  child { node[nt]{Exp1}
+    child { node[nt]{Exp1}
+      child { node[nt]{Exp2} child { node[tm]{2} } }
+    }
+    child { node[tm]{*} }
+    child { node[nt]{Exp2} child { node[tm]{3} } }
+  };
+\end{tikzpicture}
+\end{center}
+
+\paragraph{(c) \texttt{1+(2*3)}}
+\begin{center}
+\begin{tikzpicture}[ptree]
+\node[nt]{Exp}
+  child { node[nt]{Exp}
+    child { node[nt]{Exp1}
+      child { node[nt]{Exp2} child { node[tm]{1} } }
+    }
+  }
+  child { node[tm]{+} }
+  child { node[nt]{Exp1}
+    child { node[nt]{Exp2}
+      child { node[tm]{(} }
+      child { node[nt]{Exp}
+        child { node[nt]{Exp1}
+          child { node[nt]{Exp1}
+            child { node[nt]{Exp2} child { node[tm]{2} } }
+          }
+          child { node[tm]{*} }
+          child { node[nt]{Exp2} child { node[tm]{3} } }
+        }
+      }
+      child { node[tm]{)} }
+    }
+  };
+\end{tikzpicture}
+\end{center}
+
+
+\paragraph{(d) \texttt{(1+2)*3}}
+\begin{center}
+\begin{tikzpicture}[ptree]
+\node[nt]{Exp}
+  child { node[nt]{Exp1}
+    child { node[nt]{Exp1}
+      child { node[nt]{Exp2}
+        child { node[tm]{(} }
+        child { node[nt]{Exp}
+          child { node[nt]{Exp}
+            child { node[nt]{Exp1}
+              child { node[nt]{Exp2} child { node[tm]{1} } }
+            }
+          }
+          child { node[tm]{+} }
+          child { node[nt]{Exp1}
+            child { node[nt]{Exp2} child { node[tm]{2} } }
+          }
+        }
+        child { node[tm]{)} }
+      }
+    }
+    child { node[tm]{*} }
+    child { node[nt]{Exp2} child { node[tm]{3} } }
+  };
+\end{tikzpicture}
+\end{center}
+
+\paragraph{(e) \texttt{1+2*3+4*5+6}}
+\begin{center}
+\begin{tikzpicture}[ptree]
+\node[nt]{Exp}
+  % Left: ((1 + 2*3) + 4*5)
+  child { node[nt]{Exp}
+    child { node[nt]{Exp}
+      % (1 + 2*3)
+      child { node[nt]{Exp}
+        child { node[nt]{Exp1}
+          child { node[nt]{Exp2} child { node[tm]{1} } }
+        }
+      }
+      child { node[tm]{+} }
+      child { node[nt]{Exp1}
+        child { node[nt]{Exp1}
+          child { node[nt]{Exp2} child { node[tm]{2} } }
+        }
+        child { node[tm]{*} }
+        child { node[nt]{Exp2} child { node[tm]{3} } }
+      }
+    }
+    child { node[tm]{+} }
+    child { node[nt]{Exp1}
+      child { node[nt]{Exp1}
+        child { node[nt]{Exp2} child { node[tm]{4} } }
+      }
+      child { node[tm]{*} }
+      child { node[nt]{Exp2} child { node[tm]{5} } }
+    }
+  }
+  child { node[tm]{+} }
+  child { node[nt]{Exp1}
+    child { node[nt]{Exp2} child { node[tm]{6} } }
+  };
+\end{tikzpicture}
+\end{center}
+
+% =========================================================
+\subsubsection{Questions}
+\emph{Why does this grammar make `+' left-associative at the \texttt{Exp} level and `*' left-associative at the \texttt{Exp1} level, and how would we change it to make them right-associative?}
+
 % =========================================================
 \section{Essay (Synthesis)}
 This section intentionally left blank.
@@ -314,3 +477,4 @@ This section intentionally left blank.
 [BLA] Author, \emph{Title}, Publisher, Year.
 
 \end{document}
+
