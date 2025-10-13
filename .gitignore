@@ -2,3 +2,5 @@ report.log
 report.aux
 report.out
 report.toc
+report.fdb_latexmk
+report.fls
