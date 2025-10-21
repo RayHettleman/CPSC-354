@@ -458,7 +458,65 @@ Nonterminals are boxed; terminals are leaves.
 
 % =========================================================
 \subsubsection{Questions}
-\emph{If we added subtraction and division rules without changing the structure would it stay unambiguous?}
+\emph{Could this grammar still work if “+” and “” had the same priority?}
+
+% ---------- Week 8 ----------
+\subsection{Week 8}
+
+\subsubsection{Notes and Exploration}
+I completed Levels 5--8 of the \emph{Natural Number Game} (NNG). The key tools were:
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{Rewriting} with \texttt{rw [lemma]} to substitute equals for equals.
+  \item \textbf{\texttt{rfl}} to close a goal when both sides are definitionally identical.
+  \item Peano-style equations for addition and numerals, including \texttt{add\_zero}, \texttt{add\_succ}, \texttt{add\_one}, \texttt{one\_eq\_succ\_zero}, and \texttt{two\_eq\_succ\_one}.
+\end{itemize}
+
+\subsubsection{Homework (NNG Levels 5--8)}
+\paragraph{5/8: Adding zero.} \emph{Goal:} $a + (b+0) + (c+0) = a+b+c$.\\
+\emph{Lean steps:} \texttt{rw [add\_zero]} (on $b+0$), \texttt{rw [add\_zero]} (on $c+0$), \texttt{rfl}.
+
+\paragraph{6/8: Precision rewriting.} \emph{Goal:} $a + (b+0) + (c+0) = a+b+c$.\\
+\emph{Lean steps:} \texttt{rw [add\_zero]} (on $b+0$), \texttt{rw [add\_zero]} (on $c+0$), \texttt{rfl}.
+
+\paragraph{7/8: \texttt{add\_succ}.} \emph{Goal:} $\mathrm{succ}\,n = n+1$.\\
+\emph{Lean steps:} \texttt{rw [one\_eq\_succ\_zero]} to get $n+1=n+\mathrm{succ}\,0$; \texttt{rw [add\_succ]} to obtain $\mathrm{succ}(n+0)$; \texttt{rw [add\_zero]}; \texttt{rfl}.
+
+\paragraph{8/8: $2+2=4$.} \emph{Outline:} Rewrite $2$ and $4$ as successors (\texttt{two\_eq\_succ\_one}, etc.), use \texttt{add\_succ} to pull \(\mathrm{succ}\) out of addition stepwise, and finish by \texttt{rfl} once both sides match.
+
+\subsubsection{Natural-Language Proof (English math proof)}
+\paragraph{Claim.} \(2+2=4\).
+
+\paragraph{Assumptions/Definitions.}
+Let \(0\) be the base natural number and \(\mathrm{succ}(n)\) the successor of \(n\).
+Define \(1=\mathrm{succ}(0)\), \(2=\mathrm{succ}(1)\), and \(4=\mathrm{succ}(\mathrm{succ}(\mathrm{succ}(\mathrm{succ}(0))))\).
+Addition is defined by the Peano axioms:
+\[
+\forall a,\; a+0=a \quad\text{and}\quad \forall a,b,\; a+\mathrm{succ}(b)=\mathrm{succ}(a+b).
+\]
+
+\paragraph{Proof.}
+We compute \(2+2\) using the addition axioms.
+First rewrite \(2=\mathrm{succ}(1)\), so
+\[
+2+2 \;=\; 2+\mathrm{succ}(1) \;=\; \mathrm{succ}(2+1) \quad\text{(by the second axiom).}
+\]
+Again rewrite \(1=\mathrm{succ}(0)\) to get
+\[
+2+1 \;=\; 2+\mathrm{succ}(0) \;=\; \mathrm{succ}(2+0) \;=\; \mathrm{succ}(2) \quad\text{(using both axioms).}
+\]
+Therefore
+\[
+2+2 \;=\; \mathrm{succ}(2+1) \;=\; \mathrm{succ}(\mathrm{succ}(2)).
+\]
+Since \(2=\mathrm{succ}(1)\), we have
+\[
+\mathrm{succ}(\mathrm{succ}(2))=\mathrm{succ}(\mathrm{succ}(\mathrm{succ}(1)))=
+\mathrm{succ}(\mathrm{succ}(\mathrm{succ}(\mathrm{succ}(0))))=4.
+\]
+Hence \(2+2=4\). \(\square\)
+
+\subsubsection{Discord Question}
+\emph{When using \texttt{rw [add\_zero]}, how does Lean know which part of the equation to rewrite first?}
 
 % =========================================================
 \section{Essay (Synthesis)}
@@ -474,7 +532,6 @@ This section intentionally left blank.
 
 % =========================================================
 \section*{References}
-[BLA] Author, \emph{Title}, Publisher, Year.
+
 
 \end{document}
-
