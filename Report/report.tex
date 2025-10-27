@@ -518,6 +518,193 @@ Hence \(2+2=4\). \(\square\)
 \subsubsection{Discord Question}
 \emph{When using \texttt{rw [add\_zero]}, how does Lean know which part of the equation to rewrite first?}
 
+% ---------- Week 9 ----------
+\subsection{Week 9}
+
+\subsubsection{Notes and Exploration}
+This week I worked through \emph{Addition World} in the Natural Number Game.  
+Key theorems proved in this world:
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{zero\_add:} $0 + n = n$ (proved by induction).
+  \item \textbf{succ\_add:} $\mathrm{succ}(a) + b = \mathrm{succ}(a + b)$ (proved by induction).
+  \item \textbf{add\_comm:} $a + b = b + a$ (commutativity of $+$).
+  \item \textbf{add\_assoc:} $(a + b) + c = a + (b + c)$ (associativity of $+$).
+  \item \textbf{add\_right\_comm:} $(a + b) + c = (a + c) + b$.
+\end{itemize}
+
+The HW 9 instruction is:  
+For Level 5 of addition world (\texttt{add\_right\_comm}), give two solutions in the report:
+(1) a proof that uses induction and  
+(2) a proof that does \emph{not} use induction.  
+For each version, also write the corresponding ``pen-and-paper'' math proof.
+
+\subsubsection{Homework (Addition World Level 5 / HW 9)}
+
+\paragraph{Theorem (Level 5).}
+For all natural numbers $a,b,c$, we have
+\[
+(a + b) + c \;=\; (a + c) + b.
+\]
+In Lean, this theorem is called \texttt{add\_right\_comm}.
+
+\bigskip
+\noindent\textbf{Solution A: With Induction.}  
+We prove \texttt{add\_right\_comm} by induction on $c$.
+
+\emph{Lean tactic steps:}
+\begin{itemize}[leftmargin=1.4em]
+  \item \texttt{induction c with d hd}
+  \item \texttt{rw [add\_zero]}
+  \item \texttt{rw [add\_zero]}
+  \item \texttt{rfl}
+  \item \texttt{rw [add\_succ]}
+  \item \texttt{rw [succ\_add]}
+  \item \texttt{rw [hd]}
+  \item \texttt{rfl}
+\end{itemize}
+
+Explanation of structure (what the tactics are doing, summarized in math terms):
+
+\emph{Base case ($c=0$).}  
+Goal:
+\[
+(a+b)+0 \;=\; (a+0)+b.
+\]
+By \texttt{add\_zero}, $(a+b)+0 = a+b$, and $(a+0)+b = a+b$.  
+So both sides are $a+b$. Closed by \texttt{rfl}.
+
+\emph{Inductive step ($c = \mathrm{succ}(d)$).}  
+Induction hypothesis (called \texttt{hd} in Lean):
+\[
+(a+b)+d \;=\; (a+d)+b.
+\]
+Goal:
+\[
+(a+b)+\mathrm{succ}(d) \;=\; (a+\mathrm{succ}(d))+b.
+\]
+
+Using the Peano definition of $+$ on the right argument,
+\[
+(a+b)+\mathrm{succ}(d) = \mathrm{succ}((a+b)+d)
+\quad\text{and}\quad
+a+\mathrm{succ}(d) = \mathrm{succ}(a+d).
+\]
+So the right-hand side becomes
+\[
+(a+\mathrm{succ}(d))+b
+= (\mathrm{succ}(a+d))+b
+= \mathrm{succ}\big((a+d)+b\big)
+\]
+using \texttt{succ\_add}, which says $\mathrm{succ}(x)+y=\mathrm{succ}(x+y)$.
+
+Thus the goal reduces to
+\[
+\mathrm{succ}\big((a+b)+d\big)
+=
+\mathrm{succ}\big((a+d)+b\big).
+\]
+By the induction hypothesis, $(a+b)+d = (a+d)+b$, so the two $\mathrm{succ}(\cdot)$ terms are equal. This closes with \texttt{rfl}.
+
+\emph{Conclusion.}  
+By induction on $c$, $(a+b)+c = (a+c)+b$ holds for all $a,b,c$.
+
+\bigskip
+\noindent\textbf{Solution B: Without Induction.}  
+We can also prove \texttt{add\_right\_comm} using only associativity and commutativity of addition, without \texttt{induction}.
+
+\emph{Lean tactic steps (no induction):}
+\begin{itemize}[leftmargin=1.4em]
+  \item \texttt{rw [add\_assoc]}
+  \item \texttt{rw [add\_comm b c]}
+  \item \texttt{rw [\textbackslash leftarrow{} add\_assoc]}
+  \item \texttt{rfl}
+\end{itemize}
+
+Those steps correspond exactly to the following algebra moves:
+\[
+(a+b)+c
+\;=\;
+a+(b+c)
+\quad\text{(associativity, \texttt{add\_assoc})}
+\]
+\[
+=\;
+a+(c+b)
+\quad\text{(commutativity on $b+c$, \texttt{add\_comm b c})}
+\]
+\[
+=\;
+(a+c)+b
+\quad\text{(associativity again, undoing \texttt{add\_assoc})}.
+\]
+This matches the goal $(a+b)+c = (a+c)+b$.
+
+\bigskip
+\noindent\textbf{English/Pen-and-Paper Proofs for HW 9}
+
+\paragraph{Solution A (Induction Proof in Math).}
+We prove $(a+b)+c = (a+c)+b$ for all $a,b,c \in \mathbb{N}$ by induction on $c$.
+
+\textbf{Base case:} $c=0$.  
+Then
+\[
+(a+b)+0 = a+b
+\quad\text{and}\quad
+(a+0)+b = a+b,
+\]
+because $x+0=x$ for any $x$.  
+So $(a+b)+0 = (a+0)+b$.
+
+\textbf{Inductive step:} Assume $(a+b)+d = (a+d)+b$ for some $d$.  
+We must show $(a+b)+\mathrm{succ}(d) = (a+\mathrm{succ}(d))+b$.
+
+By the Peano definition of addition on the right argument,
+\[
+(a+b)+\mathrm{succ}(d) = \mathrm{succ}((a+b)+d).
+\]
+Also,
+\[
+a+\mathrm{succ}(d) = \mathrm{succ}(a+d),
+\]
+so
+\[
+(a+\mathrm{succ}(d))+b 
+= (\mathrm{succ}(a+d))+b 
+= \mathrm{succ}((a+d)+b),
+\]
+using the lemma $\mathrm{succ}(x)+y = \mathrm{succ}(x+y)$.
+
+So it suffices to show
+\[
+\mathrm{succ}((a+b)+d) = \mathrm{succ}((a+d)+b),
+\]
+which follows from the induction hypothesis $(a+b)+d = (a+d)+b$.  
+Therefore the statement holds for $\mathrm{succ}(d)$.
+
+By induction on $c$, $(a+b)+c = (a+c)+b$ for all $a,b,c$.
+
+\paragraph{Solution B (Algebraic / No Induction).}
+We use associativity and commutativity of addition on $\mathbb{N}$.
+
+Starting from the left-hand side,
+\[
+(a+b)+c = a+(b+c)
+\quad\text{(associativity of $+$)},
+\]
+\[
+= a+(c+b)
+\quad\text{(commutativity of $+$)},
+\]
+\[
+= (a+c)+b
+\quad\text{(associativity of $+$ again)}.
+\]
+This is exactly the desired right-hand side $(a+c)+b$.  
+No induction was needed.
+
+\subsubsection{Questions}
+\emph{When should I solve these problems using induction vs without?}
+
 % =========================================================
 \section{Essay (Synthesis)}
 This section intentionally left blank.
