@@ -705,6 +705,192 @@ No induction was needed.
 \subsubsection{Questions}
 \emph{When should I solve these problems using induction vs without?}
 
+% ---------- Week 10 ----------
+\subsection{Week 10}
+
+\subsubsection{Notes and Exploration}
+This week I finished the \textbf{Lean Logic Game} tutorial on implications, called \emph{Party Snacks}. The tutorial shows that
+\begin{itemize}[leftmargin=1.4em]
+  \item an implication $P \to Q$ is a function from evidence of $P$ to evidence of $Q$;
+  \item conjunction $P \land Q$ is a pair made with \texttt{and\_intro};
+  \item taking a function of \emph{two} inputs and turning it into a function of \emph{one} input that returns a function (currying) is exactly what Lean is doing when we write \texttt{fun x => fun y => ...}.
+\end{itemize}
+Levels 6--9 are the ones required for the HW, so below I spell out every little step.
+
+\subsubsection{Homework (Party Snacks, Levels 6--9)}
+
+% ---------------- Level 6 ----------------
+\paragraph{Level 6/9 (\texttt{and\_imp}).}
+\textbf{Goal.} Build
+\[
+C \to D \to S
+\]
+from the assumption
+\[
+h : C \land D \to S.
+\]
+
+So Lean is asking us to produce a \emph{function} that, when you hand it a $c : C$ and then a $d : D$, it can call $h$ on the \emph{pair} $(c,d)$ and get an $S$.
+
+\textbf{Plan.}
+\begin{enumerate}[label=\arabic*.,leftmargin=1.4em]
+  \item Start a function that takes $c : C$.
+  \item Inside it, start another function that takes $d : D$.
+  \item Turn $(c,d)$ into evidence of $C \land D$ using \texttt{and\_intro c d}.
+  \item Feed that to $h$ to get the $S$.
+\end{enumerate}
+
+\textbf{Step-by-step term.}
+\[
+\underbrace{\texttt{fun c : C =>}}_{\text{1st argument}}
+\underbrace{\texttt{ fun d : D =>}}_{\text{2nd argument}}
+\underbrace{\texttt{ h (and\_intro c d) }}_{\text{call the given implication}}
+\]
+
+\textbf{What Lean checks.}
+\begin{itemize}[leftmargin=1.4em]
+  \item After \texttt{fun c =>} the goal becomes $D \to S$ (because we promised to produce a function of $c$).
+  \item After \texttt{fun d =>} the goal becomes $S$.
+  \item \texttt{and\_intro c d} has type $C \land D$.
+  \item $h$ has type $C \land D \to S$, so $h (and\_intro c d)$ has type $S$, which matches the goal.
+\end{itemize}
+
+\textbf{Final Lean line.}
+\begin{verbatim}
+exact fun c => fun d => h (and_intro c d)
+\end{verbatim}
+
+% ---------------- Level 7 ----------------
+\paragraph{Level 7/9 (\texttt{and\_imp 2}).}
+\textbf{Goal.} Build
+\[
+(C \land D) \to S
+\]
+from the assumption
+\[
+h : C \to D \to S.
+\]
+
+This is the \emph{uncurried} direction: instead of receiving $C$ and $D$ separately, we receive \emph{one} thing, namely evidence for $C \land D$, and from that we must produce $S$.
+
+\textbf{Plan.}
+\begin{enumerate}[label=\arabic*.,leftmargin=1.4em]
+  \item Start a function that takes $hcd : C \land D$.
+  \item From $hcd$ we can project the left part: \texttt{hcd.left} has type $C$.
+  \item From $hcd$ we can project the right part: \texttt{hcd.right} has type $D$.
+  \item Since $h : C \to D \to S$, we can first give it a $C$, then a $D$, to get $S$: \texttt{h (hcd.left) (hcd.right)}.
+\end{enumerate}
+
+\textbf{Step-by-step term.}
+\[
+\texttt{fun hcd : C ∧ D =>}
+\quad
+\texttt{h hcd.left hcd.right}
+\]
+
+\textbf{What Lean checks.}
+\begin{itemize}[leftmargin=1.4em]
+  \item After \texttt{fun hcd =>} the goal is $S$.
+  \item \texttt{hcd.left} : $C$, \texttt{hcd.right} : $D$.
+  \item \texttt{h hcd.left} : $D \to S$.
+  \item \texttt{(h hcd.left) hcd.right} : $S$.
+\end{itemize}
+
+\textbf{Final Lean line.}
+\begin{verbatim}
+exact fun hcd => h hcd.left hcd.right
+\end{verbatim}
+
+% ---------------- Level 8 ----------------
+\paragraph{Level 8/9 (\texttt{Distribute}).}
+\textbf{Given.}
+\[
+h : (S \to C) \land (S \to D)
+\]
+So $h.left$ has type $S \to C$ and $h.right$ has type $S \to D$.
+
+\textbf{Goal.}
+\[
+S \to C \land D
+\]
+i.e. “if we have an $s : S$, we can produce both a $C$ and a $D$.”
+
+\textbf{Plan.}
+\begin{enumerate}[label=\arabic*.,leftmargin=1.4em]
+  \item Start a function that takes $s : S$.
+  \item Use $h.left : S \to C$ and apply it to $s$ to get a $C$.
+  \item Use $h.right : S \to D$ and apply it to $s$ to get a $D$.
+  \item Glue those two into $C \land D$ using \texttt{and\_intro}.
+\end{enumerate}
+
+\textbf{Step-by-step term.}
+\[
+\texttt{fun s : S =>}
+\quad
+\texttt{and\_intro (h.left s) (h.right s)}
+\]
+
+\textbf{What Lean checks.}
+\begin{itemize}[leftmargin=1.4em]
+  \item After \texttt{fun s =>} the goal is $C \land D$.
+  \item \texttt{h.left s} : $C$, \texttt{h.right s} : $D$.
+  \item \texttt{and\_intro (h.left s) (h.right s)} : $C \land D$.
+\end{itemize}
+
+\textbf{Final Lean line.}
+\begin{verbatim}
+exact fun s => and_intro (h.left s) (h.right s)
+\end{verbatim}
+
+% ---------------- Level 9 ----------------
+\paragraph{Level 9/9 (\texttt{Uncertain Snacks}, boss).}
+\textbf{Goal.}
+\[
+R \to (S \to R) \land (\neg S \to R).
+\]
+Read: “If Riffin is bringing a snack, then (1) if Sybeth brings one, Riffin is bringing a snack, and (2) if Sybeth does \emph{not} bring one, Riffin is still bringing a snack.”
+
+\textbf{Given.}
+We start only with $r : R$.
+
+\textbf{Plan.}
+\begin{enumerate}[label=\arabic*.,leftmargin=1.4em]
+  \item Start a function that takes $r : R$.
+  \item We must output an \emph{and}-pair, so we will finish with \texttt{and\_intro ... ...}.
+  \item Left part of the pair must have type $S \to R$.
+  \item Right part of the pair must have type $(\neg S) \to R$.
+  \item But we already have $r : R$, and neither of these two subgoals actually needs their argument.
+  \item So for the left part we write \texttt{fun \_ : S => r}.
+  \item For the right part we write \texttt{fun \_ : ¬ S => r}.
+\end{enumerate}
+
+\textbf{Step-by-step term.}
+\[
+\texttt{fun r : R =>}
+\quad
+\texttt{and\_intro}
+\quad
+  \underbrace{\texttt{(fun \_ : S => r)}}_{\text{has type } S \to R}
+\quad
+  \underbrace{\texttt{(fun \_ : ¬ S => r)}}_{\text{has type } ¬S \to R}
+\]
+
+\textbf{What Lean checks.}
+\begin{itemize}[leftmargin=1.4em]
+  \item After \texttt{fun r =>} the goal is $(S \to R) \land (\neg S \to R)$.
+  \item \texttt{fun \_ => r} always has the right implication type, because no matter what you give it, it returns $r : R$.
+  \item \texttt{and\_intro (fun \_ => r) (fun \_ => r)} has the desired conjunction type.
+\end{itemize}
+
+\textbf{Final Lean line.}
+\begin{verbatim}
+exact fun r => and_intro (fun _ => r) (fun _ => r)
+\end{verbatim}
+
+\subsubsection{Questions}
+\emph{When is it better to package information together, and when is it better to keep it separate?}
+
+
 % =========================================================
 \section{Essay (Synthesis)}
 This section intentionally left blank.
@@ -719,6 +905,5 @@ This section intentionally left blank.
 
 % =========================================================
 \section*{References}
-
 
 \end{document}
