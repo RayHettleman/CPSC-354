@@ -890,6 +890,76 @@ exact fun r => and_intro (fun _ => r) (fun _ => r)
 \subsubsection{Questions}
 \emph{When is it better to package information together, and when is it better to keep it separate?}
 
+% ---------- Week 11 ----------
+\subsection{Week 11}
+
+\subsubsection{Notes and Exploration}
+I completed Levels 9--12 of the \emph{Lean Logic Negation Tutorial}. The key ideas are:
+\begin{itemize}[leftmargin=1.4em]
+  \item \(\neg P\) is shorthand for \(P \to \mathrm{False}\).
+  \item From a conjunction \(P \land Q\), we project with \texttt{.left} and \texttt{.right}.
+  \item \texttt{false\_elim} proves any proposition from \(\mathrm{False}\) (principle of explosion).
+\end{itemize}
+
+\subsubsection{Homework (Negation Tutorial Levels 9--12)}
+
+% ---------------- Level 9 ----------------
+\paragraph{Level 9/12: \textit{Allergy \#1} (\(\neg(P \land A)\) from \(h : P \to \neg A\)).}
+\textbf{Goal.} \(\neg(P \land A)\). \quad
+\textbf{Given.} \(h : P \to \neg A\).
+\begin{itemize}[leftmargin=1.4em]
+  \item Assume \(hpa : P \land A\). Then \(hpa.left : P\) and \(hpa.right : A\).
+  \item From \(h\) we get \(h\,hpa.left : \neg A\), i.e.\ \(A \to \mathrm{False}\).
+  \item Apply to \(hpa.right\) to reach \(\mathrm{False}\).
+\end{itemize}
+\textbf{Final Lean line.}
+\begin{verbatim}
+exact (fun hpa => (h hpa.left) hpa.right)
+\end{verbatim}
+
+% ---------------- Level 10 ----------------
+\paragraph{Level 10/12: \textit{Allergy \#2} (\(P \to \neg A\) from \(h : \neg(P \land A)\)).}
+\textbf{Goal.} \(P \to (A \to \mathrm{False})\). \quad
+\textbf{Given.} \(h : \neg(P \land A)\).
+\begin{itemize}[leftmargin=1.4em]
+  \item Take \(p:P\) and \(a:A\); then \(\langle p,a\rangle : P \land A\).
+  \item Apply \(h\) to derive \(\mathrm{False}\).
+\end{itemize}
+\textbf{Final Lean line.}
+\begin{verbatim}
+exact (fun p a => h ⟨p, a⟩)
+\end{verbatim}
+
+% ---------------- Level 11 ----------------
+\paragraph{Level 11/12: \textit{not\_not\_not} (\(\neg A\) from \(h : \neg\neg\neg A\)).}
+\textbf{Goal.} \(\neg A\). \quad
+\textbf{Given.} \(h : (\neg\neg A) \to \mathrm{False}\).
+\begin{itemize}[leftmargin=1.4em]
+  \item To show \(A \to \mathrm{False}\), assume \(a:A\).
+  \item Build \(\neg\neg A\) by \((\lambda na:\neg A,\, na\,a)\).
+  \item Feed this into \(h\) to get \(\mathrm{False}\).
+\end{itemize}
+\textbf{Final Lean line.}
+\begin{verbatim}
+exact (fun a => h (fun na => na a))
+\end{verbatim}
+
+% ---------------- Level 12 ----------------
+\paragraph{Level 12/12 (Boss): \(\neg\neg B\) from \(h : \neg(B \to C)\).}
+\textbf{Goal.} \(\neg\neg B\), i.e.\ \((\neg B) \to \mathrm{False}\). \quad
+\textbf{Given.} \(h : (B \to C) \to \mathrm{False}\).
+\begin{itemize}[leftmargin=1.4em]
+  \item Assume \(nb : \neg B\). Define \(f : B \to C\) by \(f\,b := \texttt{false\_elim}(nb\,b)\).
+  \item Then \(h\,f : \mathrm{False}\). Hence \((\neg B) \to \mathrm{False}\).
+\end{itemize}
+\textbf{Final Lean line.}
+\begin{verbatim}
+exact (fun nb => h (fun b => false_elim (nb b)))
+\end{verbatim}
+
+\subsubsection{Questions}
+\emph{Is there a quick rule of thumb for spotting when a goal is really “prove a function to False”?}
+
 
 % =========================================================
 \section{Essay (Synthesis)}
