@@ -960,6 +960,132 @@ exact (fun nb => h (fun b => false_elim (nb b)))
 \subsubsection{Questions}
 \emph{Is there a quick rule of thumb for spotting when a goal is really “prove a function to False”?}
 
+% ---------- Week 12 ----------
+\subsection{Week 12}
+
+\subsubsection{Notes and Exploration}
+We read the Towers of Hanoi notes and treated the recursive definition of \texttt{hanoi} as a pair of rewrite rules.  
+The two rules are
+
+\[
+\texttt{hanoi 1 x y = move x y}
+\]
+\[
+\texttt{hanoi (n+1) x y =}
+\quad
+\texttt{hanoi n x (other x y);}
+\quad
+\texttt{move x y;}
+\quad
+\texttt{hanoi n (other x y) y.}
+\]
+
+I tried to think of \texttt{hanoi n x y} as the phrase “move a tower of size \(n\) from peg \(x\) to peg \(y\) using the remaining peg.”  
+The trace then becomes a long horizontal and vertical picture of the recursive calls, where indentation shows call depth and each \texttt{move} line is an actual step in time.
+
+\subsubsection{Homework (Towers of Hanoi)}
+
+\paragraph{1. Completed execution for \texttt{hanoi 5 0 2}.}
+
+\begin{verbatim}
+hanoi 5 0 2
+  hanoi 4 0 1
+    hanoi 3 0 2
+      hanoi 2 0 1
+        hanoi 1 0 2 = move 0 2
+        move 0 1
+        hanoi 1 2 1 = move 2 1
+      move 0 2
+      hanoi 2 1 2
+        hanoi 1 1 0 = move 1 0
+        move 1 2
+        hanoi 1 0 2 = move 0 2
+    move 0 1
+    hanoi 3 2 1
+      hanoi 2 2 0
+        hanoi 1 2 1 = move 2 1
+        move 2 0
+        hanoi 1 1 0 = move 1 0
+      move 2 1
+      hanoi 2 0 1
+        hanoi 1 0 2 = move 0 2
+        move 0 1
+        hanoi 1 2 1 = move 2 1
+  move 0 2
+  hanoi 4 1 2
+    hanoi 3 1 0
+      hanoi 2 1 2
+        hanoi 1 1 0 = move 1 0
+        move 1 2
+        hanoi 1 0 2 = move 0 2
+      move 1 0
+      hanoi 2 2 0
+        hanoi 1 2 1 = move 2 1
+        move 2 0
+        hanoi 1 1 0 = move 1 0
+    move 1 2
+    hanoi 3 0 2
+      hanoi 2 0 1
+        hanoi 1 0 2 = move 0 2
+        move 0 1
+        hanoi 1 2 1 = move 2 1
+      move 0 2
+      hanoi 2 1 2
+        hanoi 1 1 0 = move 1 0
+        move 1 2
+        hanoi 1 0 2 = move 0 2
+\end{verbatim}
+
+Every time the rule for \(\texttt{hanoi (n+1) x y}\) fires, the trace splits into a smaller call that uses the helper peg, then a single \texttt{move}, then another smaller call that finishes the job.
+
+\paragraph{2. Moves extracted from the trace.}
+
+Reading only the \texttt{move} lines from top to bottom gives the sequence of moves that solves the puzzle with five disks, from peg \(0\) to peg \(2\):
+
+\begin{enumerate}[leftmargin=1.4em]
+  \item move disk from peg 0 to peg 2
+  \item move disk from peg 0 to peg 1
+  \item move disk from peg 2 to peg 1
+  \item move disk from peg 0 to peg 2
+  \item move disk from peg 1 to peg 0
+  \item move disk from peg 1 to peg 2
+  \item move disk from peg 0 to peg 2
+  \item move disk from peg 0 to peg 1
+  \item move disk from peg 2 to peg 1
+  \item move disk from peg 2 to peg 0
+  \item move disk from peg 1 to peg 0
+  \item move disk from peg 2 to peg 1
+  \item move disk from peg 0 to peg 2
+  \item move disk from peg 0 to peg 1
+  \item move disk from peg 2 to peg 1
+  \item move disk from peg 0 to peg 2
+  \item move disk from peg 1 to peg 0
+  \item move disk from peg 1 to peg 2
+  \item move disk from peg 0 to peg 2
+  \item move disk from peg 1 to peg 0
+  \item move disk from peg 2 to peg 1
+  \item move disk from peg 2 to peg 0
+  \item move disk from peg 1 to peg 0
+  \item move disk from peg 1 to peg 2
+  \item move disk from peg 0 to peg 2
+  \item move disk from peg 0 to peg 1
+  \item move disk from peg 2 to peg 1
+  \item move disk from peg 0 to peg 2
+  \item move disk from peg 1 to peg 0
+  \item move disk from peg 1 to peg 2
+  \item move disk from peg 0 to peg 2
+\end{enumerate}
+
+There are \(2^{5}-1 = 31\) moves, which matches the usual formula for the minimal number of moves with five disks.
+
+\paragraph{3. Online verification.}
+
+I checked this list of moves against the interactive Towers of Hanoi link from the notes.  
+Entering the moves in order really does move the entire stack of five disks from peg \(0\) to peg \(2\) without ever placing a larger disk on top of a smaller one, and the game also reports that the puzzle was solved in thirty one moves.  
+So the completed execution trace and the extracted move list are consistent with the online version.
+
+\subsubsection{Questions}
+\emph{How can I formally prove that the Towers of Hanoi algorithm always takes exactly two to the n minus one moves?}
 
 % =========================================================
 \section{Essay (Synthesis)}
