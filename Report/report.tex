@@ -1087,6 +1087,85 @@ So the completed execution trace and the extracted move list are consistent with
 \subsubsection{Questions}
 \emph{How can I formally prove that the Towers of Hanoi algorithm always takes exactly two to the n minus one moves?}
 
+% ---------- Week 13 ----------
+\subsection{Week 13}
+
+\subsubsection{Notes and Exploration}
+In the Hanoi notes, we treated the recursive definition of \texttt{hanoi} as two rewrite rules:
+\[
+\texttt{hanoi 1 x y = move x y}
+\]
+\[
+\texttt{hanoi (n+1) x y =}
+\quad
+\texttt{hanoi n x (other x y);}
+\quad
+\texttt{move x y;}
+\quad
+\texttt{hanoi n (other x y) y.}
+\]
+To prove the move-count formula, the key idea is: \emph{count how many \texttt{move} lines these rewrite rules generate.}
+This naturally gives a recurrence, and then we solve it by induction.
+
+\subsubsection{Homework}
+
+\textbf{Claim.}  
+Let $T(n)$ be the number of \texttt{move} commands produced by the trace of \texttt{hanoi n x y} (for any pegs $x,y$).  
+Then for all $n \ge 1$,
+\[
+T(n) = 2^{n}-1.
+\]
+
+\textbf{Step 1 (Base case from the rewrite rule).}  
+For $n=1$, the rule says:
+\[
+\texttt{hanoi 1 x y = move x y.}
+\]
+So the trace has exactly one \texttt{move} line. Therefore
+\[
+T(1)=1,
+\]
+and this matches the formula because $2^{1}-1=1$.
+
+\textbf{Step 2 (Build the recurrence by counting moves in the second rule).}  
+For $n+1$, the rule expands \texttt{hanoi (n+1) x y} into three parts:
+\begin{enumerate}[leftmargin=1.4em]
+  \item \texttt{hanoi n x (other x y)} \quad contributes $T(n)$ moves,
+  \item \texttt{move x y} \quad contributes $1$ move,
+  \item \texttt{hanoi n (other x y) y} \quad contributes $T(n)$ moves.
+\end{enumerate}
+So the total number of moves is
+\[
+T(n+1)=T(n)+1+T(n)=2T(n)+1.
+\]
+
+\textbf{Step 3 (Induction proof).}  
+We prove $T(n)=2^{n}-1$ for all $n\ge 1$ by induction on $n$.
+
+\emph{Base case ($n=1$).}  
+Already shown: $T(1)=1=2^{1}-1$.
+
+\emph{Inductive step.}  
+Assume as the induction hypothesis that for some $n\ge 1$,
+\[
+T(n)=2^{n}-1.
+\]
+Using the recurrence from Step 2,
+\[
+T(n+1)=2T(n)+1.
+\]
+Substitute the hypothesis:
+\[
+T(n+1)=2(2^{n}-1)+1=2^{n+1}-2+1=2^{n+1}-1.
+\]
+This is exactly the desired formula for $n+1$.
+
+\textbf{Conclusion.}  
+By induction, for every $n\ge 1$, the trace of \texttt{hanoi n x y} contains exactly $2^{n}-1$ \texttt{move} lines.
+
+\subsubsection{Questions}
+\emph{Does it matter which pegs are called 0,1,2, or is the move count always the same?}
+
 % =========================================================
 \section{Essay (Synthesis)}
 This section intentionally left blank.
