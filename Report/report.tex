@@ -1687,28 +1687,148 @@ By induction, for every $n\ge 1$, the trace of \texttt{hanoi n x y} contains exa
 
 % =========================================================
 \section{Essay (Synthesis)}
-(approx 1 page, plus references) The homework section gives you an opportunity to practice ”skill drill”
-and to explore the material in more depth. The purpose of this section is to synthesize the knowledge you
-gained. Since Programming Languages is a wide field, it may be appropriate to focus on a particular topic
-of your choice.
-We suggest the following timeline. Week 5-8: Decide on a topic and discuss it with your instructor in the
-office hours. Write a summary email to your instructor after office hours, including the feedback you got
-with further reflection and planning. Week 9-12: Write a draft of your synthesis and discuss it with your
-instructor during office hours. Again, write a summary email to your instructor after office hours, including
-the feedback you got with further reflection and planning. The final version of the Synthesis is due with the
-rest of the final report.
+How to Prove A Program Terminates\\
 
+  The success of my programs this semester and even before this class has largely been reliant on it producing the right 
+answer. Me running the program and seeing an output that matches what I expected. I learned that a program can also be
+judged based on if it is guaranteed to finish. This has come up in the past, in infinite while loops in simple programming 
+for example, but throughout this semester, I thought of termination in a new way. If you can identify a quantity that must
+decrease every time the program takes another step, the program must terminate at some point.
+
+  While often times it is acceptable to assume a program will terminate eventually, proving it gave me a fuller understanding 
+of the program at large. I relate it with some more abstract math classes I've taken. For example, I know that 1 + 1 = 2, but
+can I prove it? In the same way, I can write a program that works with my inputs but will it always work? Have I really covered
+every base? 
+
+
+  The basic technique for proving termination is a measure function. This function maps every program state to a number. you
+then must show that every iteration or step makes the measure smaller. If every state of the program has a number 1, 2, 3, etc.
+and every step makes the measure smaller, the program must eventually reach 0 and terminate.
+
+
+  One example of this is the towers of Hanoi problem. The state of the computation includes the number of disks n which
+is all we need to track for termination. The measure function can just be n. Basically, how many disks are left to move? 
+In the recursive rule, hanoi (n+1) x y calls hanoi n x (other x y) and later hanoi n (other x y). In both cases, the value of n
+goes down by 1. By the logic laid out in the paragraph above. We have a number of disks n which is a natural number and 
+it decreases by 1 every step. At some point it will reach the base case 1, proving that the hanoi problem terminates.
+
+  Another example from the semester where a measure function makes termination feel obvious is merge sort. In merge sort, the 
+“state” you care about for termination is just the current interval you are sorting, which is determined by the endpoints. 
+A natural measure is the length of that interval, meaning how many elements are in the section you are still responsible for sorting.
+Each time merge sort recurses, it splits the interval into two smaller intervals, so the length of the problem you pass into each 
+recursive call is strictly smaller than the one you started with. Since the interval length is always a natural number and cannot 
+decrease forever, the recursion can only happen a finite number of times. Eventually, the interval becomes size 1 (or empty), which 
+is exactly the base case where the function stops calling itself, so the algorithm must terminate.
+
+  Overall, learning how to prove termination changed the way I evaluate programs. Instead of only checking whether something seems 
+to work on a few test cases, I now think about whether the program is guaranteed to finish and why. The idea of choosing a simple 
+measure and showing that it must decrease helped me see recursion and looping as something structured and predictable instead of 
+something that could “run forever” if I missed a detail. Using examples like Towers of Hanoi and merge sort made the concept feel 
+practical, because in both cases you can clearly identify what is getting smaller at every step until the base case is reached. 
+Even if I do not write formal termination proofs in everyday coding, this mindset makes me more careful and more confident that 
+I understand what my program is really doing.
+\\
+\\
+\\
 % =========================================================
 \section{Evidence of Participation}
-List your contributions to the course for your participation points
+1. Creating your own programming language - Computerphile 
+(https://www.youtube.com/watch?v=Q2UDHY5as90)
+  In this video, Dr Laurie Tratt makes a very basic programming language. He doesn't want to make it too small it won't be easy to
+tell what he is trying to do, if it's too big, it will be too advanced for the scope of the video. He starts by making an interpreter,
+a calculator. He uses reverse polish notation. It allows us to find a way around lots of weird rules in math as we know it. He 
+manipulates his numbers and math notation on a stack. He uses split, whcih is a python helper that helps him seperate each element 
+by whitespace. It also helps to split on newlines. He then adds variables. Defining them and reading them. He does this by using 
+dictionaries. Key value pairs. His end goal is to implement a factorial function. To implement comparisons he uses 0s and 1s to work 
+as booleans.
+The main question I had at the end of this video was how different would it be to implement a for loop compared to a while loop?
+
+2. The Problem With A.I. Slop! - Computerphile
+(https://www.youtube.com/watch?v=vrTrOCQZoQE)
+In this video, Mike Pound is talking about the "wonderful world of AI slop." He talks about the fact that roughly half of the articles 
+uploaded to the internet right now are AI-generated.
+He starts with the why. Why are people making so many AI articles and online content. Money is the main idea.
+He talks about how recipe websites are made. How the website could just be the ingredients and steps, but rather there are pictures and 
+stories, possibly about the recipe being passed down. The idea of the story is that if it's been passed down through a family, it was good 
+enough for them, and means something to them, so it might be the same for me. AI takes away the legitimacy of this. It can create a perfectly 
+written story about how this is somebody's grandmas recipe that is totally untrue. This has come at almost zero cost to the person who made 
+the site but will slowly bring in money with ads.
+He believes that the state of the world wide web is in danger with the shear amount of fake news being put out by AI for financial or political 
+gain. This will have an affect on things like accurate autofill search engines.
+He talks about this cycle of misinformation coming from AI because as AI keeps putting information, some of it false, into the internet, 
+other LLMs will use that information to train themselves. If that information is wrong, then the training data for these new LLMs will be wrong. 
+These LLMs will then put less true information out, which will start a cycle causing these LLMs and the internet as a whole to be less and less 
+trustworthy.
+Question: What is an easy way we can tell, besides scraping website for confirmed expert human written articles, that an article is AI slop or not? 
+
+3. Programming Loops vs Recursion - Computerphile
+(https://www.youtube.com/watch?v=HXNhEYqFo0o)
+In this video, Professor Brailsford explains the differences between Loops and recursion. he starts by talking about the early days of loops. 
+Specifically for loops. Mostly on assembly code in the 40s and 50s. One of the first high-level languages to introduce loops was Fortran.
+They were called Do loops. It talks about doing lines of code until you reach the statement with a label that you identify. Then it returns to 
+the top and increments the loop counter. These can be nested as well. Nested loops are alright but they take very long to run very quickly. 
+Every nested for loop goes n, n^2, n^3...
+Fortran did not do user-level recursion. User Level recursion is very important for extrememly difficult multi level problems.
+Algol was a language that had user level recursion. It was very slow but it came out with the right answer.
+Question: What is the tipping point where recursion becomes better than loops?
+
+4. Programming Paradigms - Computerphile
+(https://www.youtube.com/watch?v=sqV3pL5x8PI)
+In this video, Computer Scientist Laurence Day compares imperative vs functional programming. To add to 10 in imperative coding, for example JAVA, you start with an
+integer total = 0. In imperative programming you can use a for loop to add numbers i (1...10) to total until you reach 10 where you can exit the loop.
+He talks about the differences = and ==. (assignment vs equality). The main method of computation is the assignment of values to 
+variables. You refer to variables that are defined globally.
+Functional programming. (Haskell) "Appears to be magic" ALl you do is sum[1...10] that's it. There is a libraryu function that explains how sum
+works. Sum is the function that takes a list of integers and returna a single integer. Pattern matching is a way of deciding which definition of
+a function to use depending on the input. Whether the input is a boolean, integer, floaat, they could all call a different definition of the function. If a pattern 
+doesn't match the input Haskell may give an error.
+Question: What were the first languages that put these to ideas into effect?
+
+5. What is category theory? - Topos Institute
+(https://www.youtube.com/watch?v=eXBwU9ieLL0)
+Category theory is a branch of mathematics that focuses on relationships and structure, rather than on the internal details of any one area (like algebra or topology). 
+In the video, the speaker contrasts this with group theory, which studies symmetry by looking at all the ways you can transform an object while preserving its structure, 
+and then organizing those transformations into a system with axioms, subgroups, conjugacy classes, etc. The bigger point is that comparing different fields can
+be hard because each one develops its own language and tools. Category theory is presented as a way to make those comparisons more natural by giving different subjects
+a shared framework.
+The speaker describes this framework using directed graphs made of nodes and arrows. In this view, the “things” you study in a field (for example, spaces in topology) 
+can be treated as nodes, and the meaningful structure-preserving relationships between them become arrows. Different arrow styles can represent 
+different kinds of relationships. Because it focuses on how objects connect and interact, category theory can be thought of as a level of abstraction above many standard 
+theories, helping mathematicians translate ideas across subjects and build tools for tackling more complex theories later on.
+Question: How is category theory useful outside of purely mathematics?
 
 % =========================================================
 \section{Conclusion}
-(approx 400 words) A critical reflection on the content of the course. Step back from the technical details.
-How does the course fit into the wider world of software engineering? What did you find most interesting or
-useful? What improvements would you suggest?
 
+  I found this class to test my critical thinking skills rather than my technical coding skills which was refreshing
+after taking so many classes which are so heavily based on learning a specific language. I enjoyed the
+focus on logic and reasoning, and I feel like I have a better understanding of how to approach problems in a
+more abstract way. While I don't see this directly affecting my day to day coding in web development, I certainly
+see this affecting my ability to think critically about problems and come up with solutions that are not obvious at first.
+  I sincerely enjoyed the class and I feel like I learned a lot. I would recommend this class to anyone who is interested in
+programming languages. I don't have much to recommend to improve the class, as I feel like the class was well structured
+and the material built on itself while still covering a large range of topics.
+  I specifically enjoyed digging into towers of hanoi. It was fun to see a easily undrstandable representation of a recursive
+problem. I remember attempting this problem a couple of years ago and I found that this time it was eassier for me to complete.
+I believe this is because of how my problem solving improved over the course of the class.
+  I also thoroughly enjoyed the games on adam.math.hbu.de. I found it very useful to be able to try many different options 
+and receiving quick feedback on whether or not it was the correct next move. I found that this helped me learn the material much more quickly
+than if I had to work through every wrong answer I come up with on my way to the correct answer.
+  My first aha moment in the class was the first assignment, the MU puzzle. I started by brute forcing the problem by trying
+as many variations as I could but as I worked through it I realized that in the same way that i can prove something is possible
+I can prove something is impossible. This shifted my mindset immediately to a point that I was much more open to finding solutions
+that were not obvious at first.
+  Overall, I am glad I took this class as I feel I am more prepared to think critically in all parts of my life after taking it, 
+not just in software development. I noticed my problem solving skills improving week by week and I hope to feel that improvement in
+other classes I take in the future as well.
 % =========================================================
 \section*{References}
+https://adam.math.hhu.de/#/g/leanprover-community/nng4\\
+https://adam.math.hhu.de/#/g/trequetrum/lean4game-logic \\
+https://chatgpt.com/ \\
+https://www.mathsisfun.com/games/towerofhanoi.html \\
+https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes \\ 
+
+
 
 \end{document}
